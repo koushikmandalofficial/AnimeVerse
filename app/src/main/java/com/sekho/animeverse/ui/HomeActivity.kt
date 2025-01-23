@@ -110,7 +110,7 @@ class HomeActivity : AppCompatActivity() {
                 val banners: MutableList<BannerModel> = mutableListOf()
                 val animes: MutableList<AnimeModel> = mutableListOf()
 
-                response.data?.forEachIndexed { index, anime ->
+                response.data.forEachIndexed { index, anime ->
                     val id = anime.malId
                     val contName = anime.title
                     val banLink = anime.trailer?.images?.mediumImageUrl ?: ""

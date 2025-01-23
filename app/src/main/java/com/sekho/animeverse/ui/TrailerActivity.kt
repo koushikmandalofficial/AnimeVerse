@@ -1,5 +1,6 @@
 package com.sekho.animeverse.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -156,6 +157,7 @@ class TrailerActivity : AppCompatActivity() {
     }
 
 
+    @SuppressLint("SetTextI18n")
     private fun fetchDetailsData(animeApiService: AnimeApiService) {
         activityScope.launch {
             try {
@@ -208,7 +210,7 @@ class TrailerActivity : AppCompatActivity() {
 
                 val producers = response.data.producers
 
-                if (!producers.isNullOrEmpty()) {
+                if (producers.isNotEmpty()) {
                     val adapter = ProducersAdapter(producers)
                     binding.producersRecyclerView.layoutManager = LinearLayoutManager(this@TrailerActivity, LinearLayoutManager.HORIZONTAL, false)
                     binding.producersRecyclerView.adapter = adapter
