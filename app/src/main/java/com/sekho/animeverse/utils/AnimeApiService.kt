@@ -9,7 +9,7 @@ import retrofit2.http.Path
 
 interface AnimeApiService {
     @GET("top/anime")
-    fun getTopAnime(): Call<TopAnimeResponse>
+    suspend fun getTopAnime(): TopAnimeResponse
 
     @GET("anime/{id}")
     fun getAnimeDetails(@Path("id") id: String): Call<AnimeDetailsResponse>

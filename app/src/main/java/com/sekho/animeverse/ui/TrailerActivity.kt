@@ -25,6 +25,10 @@ import com.sekho.animeverse.databinding.ActivityTrailerBinding
 import com.sekho.animeverse.model.AnimeModel
 import com.sekho.animeverse.model.ProducersResponse
 import com.sekho.animeverse.utils.AnimeApiService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Retrofit
@@ -118,42 +122,38 @@ class TrailerActivity : AppCompatActivity() {
         insetsController.isAppearanceLightNavigationBars = false
     }
 
+
     private fun fetchSimilarData(animeApiService: AnimeApiService) {
-        val call = animeApiService.getTopAnime()
-
-        call.enqueue(object : retrofit2.Callback<TopAnimeResponse> {
-            override fun onResponse(
-                call: retrofit2.Call<TopAnimeResponse>,
-                response: retrofit2.Response<TopAnimeResponse>
-            ) {
-                if (response.isSuccessful) {
-                    val animes: MutableList<AnimeModel> = mutableListOf()
-
-                    response.body()?.data?.forEachIndexed { index, anime ->
-                        val id = anime.malId
-                        val contName = anime.title
-                        val episodes = anime.episodes ?: ""
-                        val score = anime.score ?: ""
-                        val posterImage = anime.images?.webp?.imageUrl ?: ""
-
-                        val animeModel = AnimeModel(id, contName, posterImage, score, episodes)
-
-                        if(id != contentId){
-                            animes.add(animeModel)
-                        }
-                    }
-
-
-                    val vodShowMoreAdapter = AnimeAdapter(this@TrailerActivity, animes)
-                    binding.similarRecyclerView.adapter = vodShowMoreAdapter
-                    binding.similarRecyclerView.layoutManager = GridLayoutManager(this@TrailerActivity, 2)
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    animeApiService.getTopAnime()
                 }
-            }
 
-            override fun onFailure(call: retrofit2.Call<TopAnimeResponse>, t: Throwable) {
-                t.printStackTrace()
+                val animes: MutableList<AnimeModel> = mutableListOf()
+
+                response.data.forEachIndexed { index, anime ->
+                    val id = anime.malId
+                    val contName = anime.title
+                    val episodes = anime.episodes ?: ""
+                    val score = anime.score ?: ""
+                    val posterImage = anime.images?.webp?.imageUrl ?: ""
+
+                    val animeModel = AnimeModel(id, contName, posterImage, score, episodes)
+
+                    if (id != contentId) {
+                        animes.add(animeModel)
+                    }
+                }
+
+                val vodShowMoreAdapter = AnimeAdapter(this@TrailerActivity, animes)
+                binding.similarRecyclerView.adapter = vodShowMoreAdapter
+                binding.similarRecyclerView.layoutManager = GridLayoutManager(this@TrailerActivity, 2)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        })
+        }
     }
 
     private fun fetchDetailsData(animeApiService: AnimeApiService) {

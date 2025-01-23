@@ -26,6 +26,10 @@ import com.sekho.animeverse.databinding.ActivityHomeBinding
 import com.sekho.animeverse.model.AnimeModel
 import com.sekho.animeverse.model.BannerModel
 import com.sekho.animeverse.utils.AnimeApiService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.Timer
@@ -90,111 +94,97 @@ class HomeActivity : AppCompatActivity() {
         insetsController.isAppearanceLightNavigationBars = false
     }
 
-    private fun fetchBannerData(animeApiService: AnimeApiService) {
-        val call = animeApiService.getTopAnime()
+    private fun fetchBannerData(animeApiService:AnimeApiService) {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    animeApiService.getTopAnime()
+                }
 
-        call.enqueue(object : retrofit2.Callback<TopAnimeResponse> {
-            override fun onResponse(
-                call: retrofit2.Call<TopAnimeResponse>,
-                response: retrofit2.Response<TopAnimeResponse>
-            ) {
-                if (response.isSuccessful) {
-                    binding.shimmerForViewpager.visibility = View.GONE
-                    binding.shimmerViewContainerHomeRecyclerviewLayout.visibility = View.GONE
-                    binding.recycleViewLayout.visibility = View.VISIBLE
-                    val banners: MutableList<BannerModel> = mutableListOf()
-                    val animes: MutableList<AnimeModel> = mutableListOf()
+                binding.shimmerForViewpager.visibility = View.GONE
+                binding.shimmerViewContainerHomeRecyclerviewLayout.visibility = View.GONE
+                binding.recycleViewLayout.visibility = View.VISIBLE
 
-                    response.body()?.data?.forEachIndexed { index, anime ->
-                        val id = anime.malId
-                        val contName = anime.title
-                        val banLink = anime.trailer?.images?.mediumImageUrl ?: ""
-                        val episodes = anime.episodes ?: ""
-                        val score = anime.score ?: ""
-                        val posterImage = anime.images?.webp?.imageUrl ?: ""
+                val banners: MutableList<BannerModel> = mutableListOf()
+                val animes: MutableList<AnimeModel> = mutableListOf()
 
-                        val banner = BannerModel(id, contName, banLink, score, episodes)
-                        val animeModel = AnimeModel(id, contName, posterImage, score, episodes)
+                response.data?.forEachIndexed { index, anime ->
+                    val id = anime.malId
+                    val contName = anime.title
+                    val banLink = anime.trailer?.images?.mediumImageUrl ?: ""
+                    val episodes = anime.episodes ?: ""
+                    val score = anime.score ?: ""
+                    val posterImage = anime.images?.webp?.imageUrl ?: ""
 
-                        if (index in 0..6) {
-                            banners.add(banner)
-                        }
+                    val banner = BannerModel(id, contName, banLink, score, episodes)
+                    val animeModel = AnimeModel(id, contName, posterImage, score, episodes)
 
-                        animes.add(animeModel)
+                    if (index in 0..6) {
+                        banners.add(banner)
                     }
 
+                    animes.add(animeModel)
+                }
 
-                    val vodShowMoreAdapter = AnimeAdapter(this@HomeActivity, animes)
-                    binding.recyclerView.adapter = vodShowMoreAdapter
-                    binding.recyclerView.layoutManager = GridLayoutManager(this@HomeActivity, 2)
+                val vodShowMoreAdapter = AnimeAdapter(this@HomeActivity, animes)
+                binding.recyclerView.adapter = vodShowMoreAdapter
+                binding.recyclerView.layoutManager = GridLayoutManager(this@HomeActivity, 2)
 
-                    val firstItem = banners.firstOrNull()?.copy()
-                    val lastItem = banners.lastOrNull()?.copy()
+                val firstItem = banners.firstOrNull()?.copy()
+                val lastItem = banners.lastOrNull()?.copy()
 
-                    if (firstItem != null && lastItem != null) {
-                        banners.add(0, lastItem)
-                        banners.add(firstItem)
-                    }
+                if (firstItem != null && lastItem != null) {
+                    banners.add(0, lastItem)
+                    banners.add(firstItem)
+                }
 
-                    runOnUiThread {
-                        val adapter = BannerAdapter(this@HomeActivity, banners)
-                        binding.viewPager.adapter = adapter
-                        binding.viewPager.setCurrentItem(1, false)
+                val adapter = BannerAdapter(this@HomeActivity, banners)
+                binding.viewPager.adapter = adapter
+                binding.viewPager.setCurrentItem(1, false)
 
-                        setupIndicators(banners.size - 2)
-                        setCurrentIndicator(0)
+                setupIndicators(banners.size - 2)
+                setCurrentIndicator(0)
 
-                        val handler = Handler(Looper.getMainLooper())
-                        val update = object : Runnable {
-                            override fun run() {
-                                val nextItem = binding.viewPager.currentItem + 1
-                                binding.viewPager.setCurrentItem(nextItem, true)
-                            }
-                        }
-
-                        swipeTimer?.schedule(object : TimerTask() {
-                            override fun run() {
-                                handler.post(update)
-                            }
-                        }, 4000, 4000)
-
-                        binding.viewPager.registerOnPageChangeCallback(object :
-                            ViewPager2.OnPageChangeCallback() {
-                            override fun onPageSelected(position: Int) {
-                                super.onPageSelected(position)
-                                val index = when (position) {
-                                    0 -> banners.size - 3
-                                    banners.size - 1 -> 0
-                                    else -> position - 1
-                                }
-                                setCurrentIndicator(index)
-                            }
-
-                            override fun onPageScrollStateChanged(state: Int) {
-                                super.onPageScrollStateChanged(state)
-                                if (state == ViewPager2.SCROLL_STATE_IDLE) {
-                                    when (binding.viewPager.currentItem) {
-                                        0 -> binding.viewPager.setCurrentItem(
-                                            banners.size - 2,
-                                            false
-                                        )
-
-                                        banners.size - 1 -> binding.viewPager.setCurrentItem(
-                                            1,
-                                            false
-                                        )
-                                    }
-                                }
-                            }
-                        })
+                val handler = Handler(Looper.getMainLooper())
+                val update = object : Runnable {
+                    override fun run() {
+                        val nextItem = binding.viewPager.currentItem + 1
+                        binding.viewPager.setCurrentItem(nextItem, true)
                     }
                 }
-            }
 
-            override fun onFailure(call: retrofit2.Call<TopAnimeResponse>, t: Throwable) {
-                t.printStackTrace()
+                swipeTimer?.schedule(object : TimerTask() {
+                    override fun run() {
+                        handler.post(update)
+                    }
+                }, 4000, 4000)
+
+                binding.viewPager.registerOnPageChangeCallback(object :
+                    ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        val index = when (position) {
+                            0 -> banners.size - 3
+                            banners.size - 1 -> 0
+                            else -> position - 1
+                        }
+                        setCurrentIndicator(index)
+                    }
+
+                    override fun onPageScrollStateChanged(state: Int) {
+                        super.onPageScrollStateChanged(state)
+                        if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                            when (binding.viewPager.currentItem) {
+                                0 -> binding.viewPager.setCurrentItem(banners.size - 2, false)
+                                banners.size - 1 -> binding.viewPager.setCurrentItem(1, false)
+                            }
+                        }
+                    }
+                })
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        })
+        }
     }
 
 
