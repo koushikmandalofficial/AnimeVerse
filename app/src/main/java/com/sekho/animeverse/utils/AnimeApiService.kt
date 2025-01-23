@@ -12,8 +12,8 @@ interface AnimeApiService {
     suspend fun getTopAnime(): TopAnimeResponse
 
     @GET("anime/{id}")
-    fun getAnimeDetails(@Path("id") id: String): Call<AnimeDetailsResponse>
+    suspend fun getAnimeDetails(@Path("id") id: String): AnimeDetailsResponse
 
     @GET("anime/{id}")
-    fun getAnimeProducers(@Path("id") id: String): Call<ProducersResponse>
+    suspend fun getAnimeProducers(@Path("id") id: String): ProducersResponse
 }

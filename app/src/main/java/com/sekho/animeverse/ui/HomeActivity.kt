@@ -21,13 +21,14 @@ import androidx.viewpager2.widget.ViewPager2
 import com.sekho.animeverse.R
 import com.sekho.animeverse.adapter.AnimeAdapter
 import com.sekho.animeverse.adapter.BannerAdapter
-import com.sekho.animeverse.api.TopAnimeResponse
 import com.sekho.animeverse.databinding.ActivityHomeBinding
 import com.sekho.animeverse.model.AnimeModel
 import com.sekho.animeverse.model.BannerModel
 import com.sekho.animeverse.utils.AnimeApiService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
@@ -37,6 +38,7 @@ import java.util.TimerTask
 
 class HomeActivity : AppCompatActivity() {
 
+    private val activityScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private lateinit var binding: ActivityHomeBinding
     private var swipeTimer: Timer? = null
     private lateinit var indicators: Array<ImageView?>
@@ -95,7 +97,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun fetchBannerData(animeApiService:AnimeApiService) {
-        CoroutineScope(Dispatchers.Main).launch {
+        activityScope.launch {
             try {
                 val response = withContext(Dispatchers.IO) {
                     animeApiService.getTopAnime()
@@ -206,6 +208,11 @@ class HomeActivity : AppCompatActivity() {
             indicators[i]?.layoutParams = layoutParams
             binding.indicatorLayout.addView(indicators[i])
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activityScope.cancel()
     }
 
 
