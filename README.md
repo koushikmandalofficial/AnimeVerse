@@ -30,11 +30,14 @@ Get in-depth information about each anime, including:
 
 ## Screenshots
 
+### Splash Screen
+![Splash Screen](https://raw.githubusercontent.com/koushikmandalofficial/AnimeVerse/main/screenshoot/1.jpeg)
+
 ### Home Screen
-![Home Screen](https://raw.githubusercontent.com/koushikmandalofficial/AnimeVerse/main/screenshoot/1.jpeg)
+![Home Screen](https://raw.githubusercontent.com/koushikmandalofficial/AnimeVerse/main/screenshoot/2.jpeg)
 
 ### Anime Details
-![Anime Details](path_to_details_screen_screenshot)
+![Home Screen](https://raw.githubusercontent.com/koushikmandalofficial/AnimeVerse/main/screenshoot/3.jpeg)
 
 ---
 
