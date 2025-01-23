@@ -45,23 +45,3 @@ To run this project locally, follow these steps:
 1. Clone the repository:
    ```bash
    git clone https://github.com/koushikmandalofficial/AnimeVerse.git
-
----
-
-## Screenshots
-
-### Home Screen
-![Home Screen](path_to_home_screen_screenshot)
-
-### Anime Details
-![Anime Details](path_to_details_screen_screenshot)
-
----
-
-## Installation
-
-To run this project locally, follow these steps:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/koushikmandalofficial/AnimeVerse.git
