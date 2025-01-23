@@ -31,7 +31,7 @@ Get in-depth information about each anime, including:
 ## Screenshots
 
 ### Home Screen
-![Home Screen](path_to_home_screen_screenshot)
+![Home Screen](https://raw.githubusercontent.com/koushikmandalofficial/AnimeVerse/main/screenshoot/1.jpg)
 
 ### Anime Details
 ![Anime Details](path_to_details_screen_screenshot)
