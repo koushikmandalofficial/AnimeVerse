@@ -1,0 +1,18 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="10dp"/>
+    <solid android:color="@color/active_indicator_color"/>
+    <size
+        android:width="17dp"
+        android:height="8dp"/>
+</shape>
+
+
+    <!--
+    <shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:shape="oval">
+        <size
+            android:width="8dp"
+            android:height="8dp"/>
+        <solid android:color="@color/active_indicator_color"/>
+    </shape>
+    -->
